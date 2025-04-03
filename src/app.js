@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 
 const app = express();
+
 app.use(
     cors({
         origin: process.env.CORS_ORIGIN,
@@ -11,8 +12,28 @@ app.use(
 );
 
 app.use(express.json({ limit: "16kb" }));
-app.use(express.urlencoded({ encoded: true, limit: "16kb" }));
+app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(express.static("public"));
-app.use(cookieParser);
+app.use(cookieParser());
+
+
+//import routes
+import userRouter from "./routes/user.router.js";
+
+//routes declaration 
+
+app.use("/api/v1/users" , userRouter)
+
+
+
+//http://localhost:8000/api/v1/users/register
+
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send("Something broke!");
+});
+
 
 export { app };

@@ -1,13 +1,29 @@
-//require('dotenv').config({path : './env'})
-
+import express from "express";
 import dotenv from "dotenv";
+import cors from "cors";
 import connectDB from "./db/index.js";
 import { app } from "./app.js";
 
+// Load environment variables from .env file
 dotenv.config({
-    path: "./env",
+    path: "./.env",
 });
 
+// Log environment variables to verify they are loaded
+console.log("PORT:", process.env.PORT); // Should log 8000
+console.log("CORS_ORIGIN:", process.env.CORS_ORIGIN); // Should log *
+
+//const app = express();
+
+// app.get('/', (req, res) => {
+//     res.send('Hello world');
+// });
+
+// app.listen(process.env.PORT, () => {
+//     console.log(`Example app listening on port ${process.env.PORT}`);
+// });
+
+// Uncomment and use connectDB if needed
 connectDB()
     .then(() => {
         app.on("error", (error) => {
@@ -15,34 +31,10 @@ connectDB()
             throw error;
         });
 
-        app.listen(process.env.PORT || 80000, () => {
-            console.log(`Server is running at :port : ${process.env.PORT}`);
+        app.listen(process.env.PORT || 8000, () => {
+            console.log(`Server is running at port: ${process.env.PORT}`);
         });
     })
     .catch((error) => {
         console.log("Mongodb connection failed" + error);
     });
-
-/*
-const app = express();
-
-(async () => {
-  try {
-    await mongoose.connect(`${process.env.MONGODB_URI}/${DB_NAME}`);
-    app.on("error", (error) => {
-      console.log("Errr : " + error);
-      throw err;
-
-      app.listen(process.env.PORT, ()=>{
-        console.log(`App islistening on port ${process.env.PORT}`)
-      })
-
-    });
-  } catch (error) {
-    console.error("Error : " + error);
-    throw err;
-  }
-})();
-
-
-*/
