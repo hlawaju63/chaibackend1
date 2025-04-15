@@ -15,10 +15,10 @@ const uploadOnCloudinary = async (localpath) => {
             resource_type: "auto",
         });
         //file has been uploaded sucessfully
-        console.log("file has been uploaded on cloudinary");
-        console.log("Response variable :::: \n" + JSON.stringify(response));
+        console.log("\nfile has been uploaded on cloudinary");
+        console.log("\nResponse variable :::: \n" + JSON.stringify(response));
         console.log(
-            "Response.url variable  :::::  " +
+            "\nResponse.url variable  :::::  " +
                 response.url
         );
         //remove files from localpath public\temp
@@ -26,7 +26,7 @@ const uploadOnCloudinary = async (localpath) => {
         fs.unlinkSync(localpath);
         return response;
     } catch (error) {
-        console.log(`Removing file from local path as it is not able to upload on Cloudinary
+        console.log(`\nRemoving file from local path as it is not able to upload on Cloudinary
               :::: user.controller.js :::: uploadOnCloudinary`);
         // remov the locally saved temporary file as upload operation got failed,
         // comment below line to see if the files are uploaded in public\temp
