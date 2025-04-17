@@ -16,11 +16,11 @@ const uploadOnCloudinary = async (localpath) => {
         });
         //file has been uploaded sucessfully
         console.log("\nfile has been uploaded on cloudinary");
-        console.log("\nResponse variable :::: \n" + JSON.stringify(response));
-        console.log(
-            "\nResponse.url variable  :::::  " +
-                response.url
-        );
+        // console.log("\nResponse variable :::: \n" + JSON.stringify(response));
+        // console.log(
+        //     "\nResponse.url variable  :::::  " +
+        //         response.url
+        // );
         //remove files from localpath public\temp
         //comment below line to see if the files are uploaded locally
         fs.unlinkSync(localpath);
