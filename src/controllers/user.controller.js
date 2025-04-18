@@ -40,7 +40,7 @@ const registerUser = asyncHandler(async (req, res) => {
     //return res
 
     const { fullName, email, username, password } = req.body;
-    // console.log("Req body :::: " , req.body);
+    //console.log("user.controller.js ::: req body :::: " , req.body);
     // console.log("email : ", email);
     console.log("registerUser ::: password : ", password);
 
@@ -156,13 +156,14 @@ const loginUser = asyncHandler(async (req, res) => {
         user._id
     );
 
-    console.log("\nAccessToken", accessToken);
-    console.log("\nRefreshToken", refreshToken);
+    console.log("\n user.controller.js ::: loginUser ::: AccessToken\n", accessToken);
+    console.log("\n user.controller.js ::: loginUser ::: RefreshToken\n", refreshToken);
 
     const loggedInUser = await User.findById(user._id).select(
         "-password -refreshToken"
     );
     console.log("\nloggedInUser", loggedInUser);
+    console.log("\nUser Logged in Sucessfully");
 
     const options = {
         httpOnly: true,
@@ -190,8 +191,8 @@ const logoutUser = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set: {
-                refreshToken: undefined,
+            $unset: {
+                refreshToken: 1,  //this removes the field from document
             },
         },
         {
@@ -213,12 +214,14 @@ const logoutUser = asyncHandler(async (req, res) => {
 const refreshAccessToken = asyncHandler(async (req, res) => {
     try {
         const incomingRefreshToken =
-            req.cookies.refreshToken || req.body.refreshToken;
+            req.cookies.refreshToken || req.body.refreshToken;    
+            
+        console.log("\nuser.controller.js ::: incomingRefreshToken ::: ", incomingRefreshToken)            
 
         if (!incomingRefreshToken) {
             throw new ApiError(
                 401,
-                "Unauthorized incomingRefreshToken request"
+                "Unauthorized incoming Refresh Token request"
             );
         }
 
@@ -264,6 +267,10 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 const changeCurrentPassword = asyncHandler(async (req, res) => {
     const { oldPassword, newPassword } = req.body;
 
+    console.log("\nuser.controller.js ::: changeCurrentPassword ::: oldPassword\n" , oldPassword)
+
+    console.log("\nuser.controller.js ::: changeCurrentPassword ::: newPassword\n" , newPassword)
+
     const user = await User.findById(req.user?._id);
 
     const isPasswordCorrect = user.isPasswordCorrect(oldPassword);
@@ -280,10 +287,10 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, {}, "Password changed Sucessfully"));
 });
 
-const getCurrentUser = asyncHandler(async (req, res) => {
+const getCurrentUser = asyncHandler(async (req, res) => { 
     return res
         .status(200)
-        .json(200, req.user, "Current User fetched Sucessfully");
+        .json(new ApiResponse(200, req.user, "Current User fetched Sucessfully"));
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
@@ -321,6 +328,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     //TO DO create util to delete file once its updated
 
     const avatar = await uploadOnCloudinary(avatarLocalPath);
+    //console.log("\nuser.controller.js ::: updateUserAvatar ::: avatar : \n", avatar)
 
     if (!avatar.url) {
         throw new ApiError(
@@ -329,7 +337,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
         );
     }
 
-    const user = await User.findById(
+    const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set: {
@@ -340,6 +348,8 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
             new: true,
         }
     ).select("-password");
+
+    console.log("\nuser.controller.js ::: updateUserAvatar ::: user : \n", user)
 
     return res
         .status(200)
@@ -362,7 +372,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
         );
     }
 
-    const user = await User.findById(
+    const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set: {
@@ -380,9 +390,11 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 });
 
 const getUserChannnelProfile = asyncHandler(async (req, res) => {
-    const username = req.params;
+    const {username} = req.params;
 
-    if (!username?.trim) {
+    //console.log("\nuser.controller.js ::: getUserChannnelProfile ::: username :", username)
+  
+    if (!username?.trim()) {
         throw new ApiError(400, "Username not found");
     }
 
@@ -456,9 +468,11 @@ const getUserChannnelProfile = asyncHandler(async (req, res) => {
 });
 
 const getWatchHistory = asyncHandler(async (req, res) => {
+
     const user = await User.aggregate([
         {
-            $match: new mongoose.Types.ObjectId(req.user?._id), //we cannot do req.user?._id here in aggregate pipeline as it takes string('asdasdasd') as it gets, generally mongoose used to handle this to get mongodb id example ObjectId('asdasdasd')
+            $match: {_id : new mongoose.Types.ObjectId(req.user._id) } //we cannot do req.user?._id here in aggregate pipeline as it takes string('asdasdasd') as it gets, generally mongoose used to handle this to get mongodb id example ObjectId('asdasdasd')
+             
         },
         {
             $lookup: {
